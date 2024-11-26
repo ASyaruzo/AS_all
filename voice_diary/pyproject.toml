@@ -1,0 +1,13 @@
+[project]
+name = "voice-diary"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "atsuya", email = "f.atsuya.personal@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
