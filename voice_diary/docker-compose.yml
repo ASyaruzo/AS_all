@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mongodb:
     image: mongo:latest
@@ -6,7 +5,25 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./mongodb/data/db:/data/db
+      - ../mongodb/data/db:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: my_mongo_db
+    networks:
+      - my_network
+
+  flask_app:
+    build: ./src/voice_diary/backend_dir # FlaskアプリケーションのDockerfileがあるディレクトリ
+    container_name: flask_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    environment:
+      FLASK_ENV: development
+    networks:
+      - my_network
+
+networks:
+  my_network:
