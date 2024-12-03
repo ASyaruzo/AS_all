@@ -1,10 +1,26 @@
 from flask import Flask
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
+client = MongoClient("mongodb://root:password@localhost:27017/")
+db = client["my_mongo_db"]
+
 @app.route("/")
 def index():
-    return "Hello, World!"
+    collection = db["これコレクション名！"] # 使用するコレクション名
+
+    data = {
+    "year_month": "2024-12-03",
+    "japanese_text": "今日はいいことがありました。",
+    "sad": 20,
+    "happy": 100,
+    "angry": 10
+    }
+
+    collection.insert_one(data)
+    data = collection.find_one()
+    return f"Hello, World! Data: {data}"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
