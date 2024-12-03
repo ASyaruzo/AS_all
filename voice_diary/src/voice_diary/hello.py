@@ -1,1 +1,1 @@
-print("Hello from voice-diary!")
+print("Hello from voice-diary")
