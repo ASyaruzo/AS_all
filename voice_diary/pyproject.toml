@@ -6,7 +6,10 @@ authors = [
     { name = "atsuya", email = "f.atsuya.personal@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "flask>=3.1.0",
+    "pymongo>=4.10.1",
+]
 
 [build-system]
 requires = ["hatchling"]
