@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template
+
 from pymongo import MongoClient
 
 app = Flask(__name__)
@@ -20,7 +21,8 @@ def index():
 
     collection.insert_one(data)
     data = collection.find_one()
-    return f"Hello, World! Data: {data}"
+    # return f"Hello, World! Data: {data}"
+    return render_template("index.html", data=data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
