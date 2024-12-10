@@ -8,6 +8,7 @@ client = MongoClient("mongodb://root:password@localhost:27017/")
 db = client["my_mongo_db"]
 
 @app.route("/")
+@app.route("/index")
 def index():
     collection = db["これコレクション名！"] # 使用するコレクション名
 
@@ -22,7 +23,7 @@ def index():
     collection.insert_one(data)
     data = collection.find_one()
     # return f"Hello, World! Data: {data}"
-    return render_template("index.html", data=data)
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
