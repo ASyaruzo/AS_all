@@ -1,8 +1,10 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 from pymongo import MongoClient
 
-app = Flask(__name__)
+app = Flask(__name__,
+           static_url_path='/static',
+           static_folder='templates/static')
 
 client = MongoClient("mongodb://root:password@localhost:27017/")
 db = client["my_mongo_db"]
@@ -27,3 +29,5 @@ def index():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
+
+
