@@ -211,6 +211,23 @@ document.addEventListener('DOMContentLoaded', function() {
             content: content
         };
         
+                // ここで日記をサーバーに送信
+        fetch('/save_diary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(diary)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            alert('日記を保存しました！');
+            // 清空表單
+            document.getElementById('diaryDate').value = '';
+            document.getElementById('diaryContent').value = '';
+        })
+        
         const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
         diaries.push(diary);
         localStorage.setItem('diaries', JSON.stringify(diaries));

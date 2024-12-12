@@ -27,6 +27,14 @@ def index():
     # return f"Hello, World! Data: {data}"
     return render_template("index.html")
 
+from flask import request, jsonify
+
+@app.route("/save_diary", methods=["POST"])
+def get_diaries():
+    diaries = request.json
+    print(diaries)
+    return render_template("index.html")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
 
