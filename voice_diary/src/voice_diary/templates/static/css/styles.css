@@ -629,7 +629,7 @@ input:checked + .slider:before {
 }
 
 .diary-item p {
-    color: #666;
+    color: #333;
     font-size: var(--base-font-size);
     line-height: 1.5;
     margin: 0;
