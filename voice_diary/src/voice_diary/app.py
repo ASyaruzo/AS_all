@@ -31,7 +31,9 @@ from flask import request, jsonify
 
 @app.route("/save_diary", methods=["POST"])
 def get_diaries():
+    collection = db["これコレクション名！"] # 使用するコレクション名
     diaries = request.json
+    collection.insert_one(diaries)
     print(diaries)
     return render_template("index.html")
 
