@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const diaryElement = document.createElement('div');
                 diaryElement.className = 'diary-item';
                 diaryElement.innerHTML = `
-                    <h4>${diary.title}</h4>
                     <p>${diary.content}</p>
                     <div class="diary-time">${diary.time}</div>
                 `;
