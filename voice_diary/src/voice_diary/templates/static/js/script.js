@@ -158,15 +158,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化日曆
     new Calendar();
 
-    // 語音輸入功能
+    // 音声入力機能の初期化
     const startVoiceBtn = document.getElementById('startVoice');
     let recognition = null;
+    let siriRecognition = null;
+    let isRecognizing = false; // マイクが作動中かどうかを追跡
 
     if ('webkitSpeechRecognition' in window) {
+        // テキスト入力用の音声認識
         recognition = new webkitSpeechRecognition();
         recognition.lang = 'ja-JP';
         recognition.continuous = true;
         recognition.interimResults = true;
+
+        recognition.onstart = () => {
+            isRecognizing = true; // マイクが作動中
+            startVoiceBtn.style.backgroundColor = '#dc3545'; // ボタンを赤色に変更
+        };
+
+        recognition.onend = () => {
+            isRecognizing = false; // マイクが終了
+            startVoiceBtn.style.backgroundColor = ''; // ボタンの色を元に戻す
+        };
 
         recognition.onresult = (event) => {
             const content = document.getElementById('diaryContent');
@@ -174,23 +187,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 .map(result => result[0].transcript)
                 .join('');
         };
+
+        // "ヘイSiri"認識用の音声認識
+        siriRecognition = new webkitSpeechRecognition();
+        siriRecognition.lang = 'ja-JP';
+        siriRecognition.continuous = true;
+        siriRecognition.interimResults = true;
+
+        siriRecognition.onresult = (event) => {
+            const content = document.getElementById('diaryContent');
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+
+            // "ヘイSiri"が検出された場合、音声入力を開始
+            if (transcript.includes("お疲れ")) {
+                startVoiceBtn.style.backgroundColor = '#dc3545';
+                recognition.start(); // テキスト入力用の音声認識を開始
+            }
+        };
     }
 
-    let isRecording = false;
+    // create-btnが押されたときにSiri認識を常に起動
+    document.querySelector('.create-btn').addEventListener('click', () => {
+        if (!siriRecognition) {
+            alert('お使いのブラウザは音声入力に対応していません。');
+            return;
+        }
+        siriRecognition.start(); // "ヘイSiri"認識を開始
+    });
+
+    // テキスト入力用マイクボタンのイベントリスナー
     startVoiceBtn.addEventListener('click', () => {
         if (!recognition) {
             alert('お使いのブラウザは音声入力に対応していません。');
             return;
         }
 
-        if (!isRecording) {
-            recognition.start();
-            startVoiceBtn.style.backgroundColor = '#dc3545';
-            isRecording = true;
+        // テキスト入力用マイクが作動中の場合、終了して"ヘイSiri"マイクに切り替え
+        if (isRecognizing) {
+            recognition.stop(); // テキスト入力用の音声認識を停止
+            siriRecognition.start(); // "ヘイSiri"認識を開始
         } else {
-            recognition.stop();
-            startVoiceBtn.style.backgroundColor = '';
-            isRecording = false;
+            recognition.start(); // テキスト入力用の音声認識を開始
         }
     });
 
