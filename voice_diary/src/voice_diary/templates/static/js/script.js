@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .join('');
 
             // "ヘイSiri"が検出された場合、音声入力を開始
-            if (transcript.includes("ヘイSiri")) {
+            if (transcript.includes("お疲れ")) {
                 startVoiceBtn.style.backgroundColor = '#dc3545';
                 recognition.start(); // テキスト入力用の音声認識を開始
             }
