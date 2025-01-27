@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/siriwave/dist/siriwave.umd.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -30,10 +31,16 @@
                         <button id="startVoice" class="voice-input-btn">
                             <span class="material-icons">mic</span>
                         </button>
+
                     </div>
+                    
                     <div class="form-actions">
                         <button id="saveDiary" class="save-btn">保存</button>
                     </div>
+
+                    <!-- SiriWave コンテナ -->
+                    <div id="siri-container"></div>
+
                 </div>
             </div>
 
