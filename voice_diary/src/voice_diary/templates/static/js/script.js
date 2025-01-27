@@ -1,20 +1,39 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 頁面切換功能
+    // SiriWave初期化
+    const siriContainer = document.getElementById('siri-container');
+    if (!siriContainer) {
+        console.error('SiriWave container not found');
+        return;
+    }
+
+    // SiriWaveの初期化
+    let siriWave = new SiriWave({
+        container: siriContainer,
+        width: 300,
+        height: 200,
+        style: 'ios9',
+        autostart: false,
+    });
+
+    // SiriWaveをグローバルにアクセス可能にする
+    window.siriWave = siriWave;
+    
+    // ページ切替機能
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            // 隱藏所有頁面
+            // 全てのページを隠す
             pages.forEach(page => {
                 page.style.display = 'none';
             });
             
-            // 顯示選中的頁面
+            // 選択したページを表示
             const pageId = item.getAttribute('data-page');
             document.getElementById(`${pageId}-page`).style.display = 'block';
             
-            // 更新導航項目的激活狀態
+            // ナビゲーション・アイテムのアクティベーション・ステータスを更新する
             navItems.forEach(navItem => {
                 navItem.classList.remove('active');
             });
@@ -22,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 初始化日曆
+    // 初期化カレンダー
     class Calendar {
         constructor() {
             this.date = new Date();
@@ -39,17 +58,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = this.date.getFullYear();
             const month = this.date.getMonth();
             
-            // 更新月份標題
+            // 月タイトルを更新
             this.currentMonthElement.textContent = `${year}年 ${this.months[month]}`;
             
-            // 清空日曆
+            // カレンダークリア
             this.calendarDaysElement.innerHTML = '';
             
-            // 獲取當月第一天和最後一天
+            // 月の最初と最後の日を取得
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             
-            // 填充上個月的日期
+            // 前月の日付を記入
             const firstDayWeekday = firstDay.getDay();
             const prevMonthLastDay = new Date(year, month, 0).getDate();
             
@@ -58,11 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.calendarDaysElement.appendChild(dayElement);
             }
             
-            // 填充當月日期
+            // 当月の日付を入力
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const dayElement = this.createDayElement(day, '');
                 
-                // 檢查是否為今天
+                // 今日の日付をチェック
                 const currentDate = new Date();
                 if (currentDate.getDate() === day && 
                     currentDate.getMonth() === month && 
@@ -70,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     dayElement.classList.add('today');
                 }
                 
-                // 檢查是否有日記
+                // 日記があるかどうかをチェック
                 if (this.hasDiary(year, month + 1, day)) {
                     dayElement.classList.add('has-diary');
                 }
@@ -78,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.calendarDaysElement.appendChild(dayElement);
             }
             
-            // 填充下個月的日期
+            // 下月の日付を入力
             const remainingDays = 42 - this.calendarDaysElement.children.length;
             for (let day = 1; day <= remainingDays; day++) {
                 const dayElement = this.createDayElement(day, 'other-month');
@@ -135,16 +154,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             this.calendarDaysElement.addEventListener('click', (e) => {
                 if (e.target.classList.contains('calendar-day')) {
-                    // 移除之前選中的日期
+                    // 以前選択した日付を削除
                     const selectedDay = this.calendarDaysElement.querySelector('.selected');
                     if (selectedDay) {
                         selectedDay.classList.remove('selected');
                     }
                     
-                    // 選中點擊的日期
+                    // 選択した日付をハイライト
                     e.target.classList.add('selected');
                     
-                    // 顯示該日期的日記
+                    // 選択した日付の日記を表示
                     const day = parseInt(e.target.textContent);
                     const month = this.date.getMonth() + 1;
                     const year = this.date.getFullYear();
@@ -155,11 +174,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 初始化日曆
+    // カレンダーの初期化
     new Calendar();
 
     // 音声入力機能の初期化
     const startVoiceBtn = document.getElementById('startVoice');
+    if (!startVoiceBtn) {
+        console.error("Start voice button not found");
+        return;
+    }
     let recognition = null;
     let siriRecognition = null;
     let isRecognizing = false; // マイクが作動中かどうかを追跡
@@ -174,11 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
         recognition.onstart = () => {
             isRecognizing = true; // マイクが作動中
             startVoiceBtn.style.backgroundColor = '#dc3545'; // ボタンを赤色に変更
+            siriWave.start(); // SiriWaveを開始
         };
 
         recognition.onend = () => {
             isRecognizing = false; // マイクが終了
             startVoiceBtn.style.backgroundColor = ''; // ボタンの色を元に戻す
+            siriWave.stop(); // SiriWaveを停止
         };
 
         recognition.onresult = (event) => {
@@ -203,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // "ヘイSiri"が検出された場合、音声入力を開始
             if (transcript.includes("お疲れ")) {
                 startVoiceBtn.style.backgroundColor = '#dc3545';
+                siriWave.start(); // SiriWaveを開始
                 recognition.start(); // テキスト入力用の音声認識を開始
             }
         };
@@ -233,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 保存日記
+    // 日記保存
     document.getElementById('saveDiary').addEventListener('click', () => {
         const date = document.getElementById('diaryDate').value;
         const content = document.getElementById('diaryContent').value;
@@ -249,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
             content: content
         };
         
-                // ここで日記をサーバーに送信
+        // ここで日記をサーバーに送信
         fetch('/save_diary', {
             method: 'POST',
             headers: {
@@ -261,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             console.log(data);
             alert('日記を保存しました！');
-            // 清空表單
+            // フォームをクリア
             document.getElementById('diaryDate').value = '';
             document.getElementById('diaryContent').value = '';
         })
@@ -270,20 +296,20 @@ document.addEventListener('DOMContentLoaded', function() {
         diaries.push(diary);
         localStorage.setItem('diaries', JSON.stringify(diaries));
         
-        // 清空表單
+        // フォームをクリア
         document.getElementById('diaryDate').value = '';
         document.getElementById('diaryContent').value = '';
         
         alert('日記を保存しました！');
 
-        // 更新日曆顯示（如果在日曆頁面）
+        // カレンダーの更新（カレンダーページの場合）
         const calendar = document.querySelector('.calendar-page');
         if (calendar && window.getComputedStyle(calendar).display !== 'none') {
             new Calendar();
         }
     });
 
-    // 深色模式切換
+    // 深色モード切替
     const darkModeToggle = document.getElementById('darkModeToggle');
     darkModeToggle.addEventListener('change', (e) => {
         if (e.target.checked) {
@@ -295,57 +321,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 檢查深色模式設定
+    // 深色モード設定のチェック
     if (localStorage.getItem('darkMode') === 'enabled') {
         document.body.classList.add('dark-mode');
         darkModeToggle.checked = true;
     }
 
-    // 數據備份
-    document.getElementById('backupData').addEventListener('click', () => {
-        const data = localStorage.getItem('diaries');
-        const blob = new Blob([data || '[]'], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'diary_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    // 數據恢復
-    document.getElementById('restoreData').addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        
-        input.onchange = e => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = readerEvent => {
-                try {
-                    const content = readerEvent.target.result;
-                    JSON.parse(content); // 驗證 JSON 格式
-                    localStorage.setItem('diaries', content);
-                    alert('データを復元しました！');
-                    location.reload();
-                } catch (err) {
-                    alert('無効なバックアップファイルです。');
-                }
-            };
-            
-            reader.readAsText(file);
-        };
-        
-        input.click();
-    });
-
-    // 顯示初始頁面（日曆）
+    // 初期ページ（カレンダー）の表示
     document.getElementById('calendar-page').style.display = 'block';
     document.querySelector('[data-page="calendar"]').classList.add('active');
 
-    // 日期選擇器點擊事件
+    // 日付選択器のクリックイベント
     const dateFormGroup = document.querySelector('#create-page .form-group');
     if (dateFormGroup) {
         dateFormGroup.addEventListener('click', function() {
