@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let recognition = null;
     let siriRecognition = null;
     let isRecognizing = false; // マイクが作動中かどうかを追跡
+    let inactivityTimeout = null; // マイクが無操作の場合のタイムアウト
 
     if ('webkitSpeechRecognition' in window) {
         // テキスト入力用の音声認識
@@ -198,19 +199,39 @@ document.addEventListener('DOMContentLoaded', function() {
             isRecognizing = true; // マイクが作動中
             startVoiceBtn.style.backgroundColor = '#dc3545'; // ボタンを赤色に変更
             siriWave.start(); // SiriWaveを開始
+
+            // 10秒間の無操作で音声入力を停止
+            inactivityTimeout = setTimeout(() => {
+                recognition.stop();
+                siriWave.stop();
+                startVoiceBtn.style.backgroundColor = ''; // ボタンの色を元に戻す
+                stop_message = '音声入力が10秒間検出されなかったため停止しました。'
+                console.log(stop_message);
+            }, 10000); // 10秒
         };
 
         recognition.onend = () => {
             isRecognizing = false; // マイクが終了
             startVoiceBtn.style.backgroundColor = ''; // ボタンの色を元に戻す
             siriWave.stop(); // SiriWaveを停止
+            clearTimeout(inactivityTimeout); // タイムーをクリア(?)
         };
 
         recognition.onresult = (event) => {
+            clearTimeout(inactivityTimeout); // タイムーをリセット(?)
             const content = document.getElementById('diaryContent');
             content.value = Array.from(event.results)
                 .map(result => result[0].transcript)
                 .join('');
+
+            // 新しいタイマーを再設定
+            inactivityTimeout = setTimeout(() => {
+                recognition.stop();
+                siriWave.stop();
+                startVoiceBtn.style.backgroundColor = ''; // ボタンの色を元に戻す
+                stop_message = '音声入力が10秒間検出されなかったため停止しました。'
+                console.log(stop_message);
+            }, 10000); // 10秒
         };
 
         // "ヘイSiri"認識用の音声認識
