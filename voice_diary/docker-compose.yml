@@ -10,7 +10,7 @@ services:
       # MONGO_INITDB_ROOT_USERNAME: root
       # MONGO_INITDB_ROOT_PASSWORD: password
       # MONGO_INITDB_DATABASE: my_mongo_db
-    command: mongod --bind_ip_all --noauth  # 認証を無効化
+    command:  mongod --bind_ip_all --noauth  # 認証を無効化
     networks:
       - my_network
 

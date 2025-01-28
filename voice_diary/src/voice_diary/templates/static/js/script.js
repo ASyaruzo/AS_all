@@ -140,15 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (selectedDay) {
                         selectedDay.classList.remove('selected');
                     }
-                    
+
                     // 選中點擊的日期
                     e.target.classList.add('selected');
-                    
+
                     // 顯示該日期的日記
                     const day = parseInt(e.target.textContent);
                     const month = this.date.getMonth() + 1;
                     const year = this.date.getFullYear();
-                    
+
                     this.showDiaries(year, month, day);
                 }
             });
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .join('');
 
             // "ヘイSiri"が検出された場合、音声入力を開始
-            if (transcript.includes("お疲れ")) {
+            if (transcript.includes("Hey Siri")) {
                 startVoiceBtn.style.backgroundColor = '#dc3545';
                 recognition.start(); // テキスト入力用の音声認識を開始
             }
