@@ -1,5 +1,17 @@
 from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
+import pyttsx3
+
+
+# 音声読み上げ関数(引数は読み上げたい文字列)
+def read_pyttsx3(literal):
+    engine = pyttsx3.init()
+    rate = engine.getProperty('rate')
+    engine.setProperty('rate', rate-50)
+    # engine.setProperty('voice', voices[0].id) # 0:日本語, 1:英語 rate-50
+    engine.say(literal)
+    engine.runAndWait()
+
 
 app = Flask(__name__,
         static_url_path='/static',
