@@ -486,7 +486,7 @@ input:checked + .slider:before {
 .calendar-wrapper {
     background: #ffffff;
     border-radius: 15px;
-    padding: 20px;
+    padding: 20px 5px;
     margin: 10px 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -641,6 +641,7 @@ input:checked + .slider:before {
     color: #333;
     font-size: var(--base-font-size);
     line-height: 1.5;
+    overflow-wrap: break-word;
     margin: 0;
 }
 
@@ -692,7 +693,7 @@ input:checked + .slider:before {
 }
 
 .form-group textarea {
-    height: 200px;
+    height: 250px;
     resize: none;
 }
 
