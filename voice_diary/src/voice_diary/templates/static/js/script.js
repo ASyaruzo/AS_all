@@ -130,12 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            
             dayDiaries.forEach(diary => {
                 const diaryElement = document.createElement('div');
                 diaryElement.className = 'diary-item';
                 diaryElement.innerHTML = `
                     <p>${diary.content}</p>
                     <div class="diary-time">${diary.time}</div>
+                    ${diary.response ? `<div class="diary-feedback">${diary.response}</div>` : ''}
+ 
                 `;
                 this.diaryListElement.appendChild(diaryElement);
             });
