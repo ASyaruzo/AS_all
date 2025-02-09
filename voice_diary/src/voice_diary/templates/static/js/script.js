@@ -17,8 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // SiriWaveをグローバルにアクセス可能にする
     window.siriWave = siriWave;
-    
+
+    document.getElementById('calendar-page').style.display = 'block';
+    document.querySelector('[data-page="calendar"]').classList.add('active');
+
     // ページ切替機能
+    console.log("最初にカレンダーページを表示");
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
 
@@ -28,11 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
             pages.forEach(page => {
                 page.style.display = 'none';
             });
-            
+
             // 選択したページを表示
             const pageId = item.getAttribute('data-page');
             document.getElementById(`${pageId}-page`).style.display = 'block';
-            
             // ナビゲーション・アイテムのアクティベーション・ステータスを更新する
             navItems.forEach(navItem => {
                 navItem.classList.remove('active');
@@ -40,6 +43,48 @@ document.addEventListener('DOMContentLoaded', function() {
             item.classList.add('active');
         });
     });
+
+    fetch('/get_diaries')
+        .then(response => response.json())
+        .then(diaries => {
+            console.log("取得したデータ:", diaries);
+            renderDiaries(diaries);
+        })
+        .catch(error => {
+            console.error('データ取得エラー', error);
+        });
+});
+
+
+// 全ての日記を一覧表示
+function renderDiaries(diaries) {
+    const diaryListElement = document.getElementById('diaryList');
+
+    console.log("日記リストの要素:", diaryListElement);
+
+    if (!diaryListElement) {
+        console.error("diaryList が見つかりません");
+        return;
+    }
+
+    diaryListElement.innerHTML = '';
+
+    if (diaries.length === 0) {
+        diaryListElement.innerHTML = '<div class="no-diary">日記はありません</div>';
+        return;
+    }
+
+    diaries.forEach(diary => {
+        const diaryElement = document.createElement('div');
+        diaryElement.className = 'diary-item';
+        diaryElement.innerHTML = `
+            <p>${diary.content}</p>
+            <div class="diary-time">${diary.time}</div>
+            ${diary.response ? `<div class="diary-feedback">${diary.response}</div>` : ''}
+        `;
+        diaryListElement.appendChild(diaryElement);
+    });
+}
 
     // 初期化カレンダー
     class Calendar {
@@ -49,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.currentMonthElement = document.getElementById('currentMonth');
             this.calendarDaysElement = document.getElementById('calendarDays');
             this.diaryListElement = document.getElementById('diaryList');
-            
+
             this.updateCalendar();
             this.setupEventListeners();
         }
@@ -57,46 +102,46 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCalendar() {
             const year = this.date.getFullYear();
             const month = this.date.getMonth();
-            
+
             // 月タイトルを更新
             this.currentMonthElement.textContent = `${year}年 ${this.months[month]}`;
-            
+
             // カレンダークリア
             this.calendarDaysElement.innerHTML = '';
-            
+
             // 月の最初と最後の日を取得
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
-            
+
             // 前月の日付を記入
             const firstDayWeekday = firstDay.getDay();
             const prevMonthLastDay = new Date(year, month, 0).getDate();
-            
+
             for (let i = firstDayWeekday - 1; i >= 0; i--) {
                 const dayElement = this.createDayElement(prevMonthLastDay - i, 'other-month');
                 this.calendarDaysElement.appendChild(dayElement);
             }
-            
+
             // 当月の日付を入力
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const dayElement = this.createDayElement(day, '');
-                
+
                 // 今日の日付をチェック
                 const currentDate = new Date();
-                if (currentDate.getDate() === day && 
-                    currentDate.getMonth() === month && 
+                if (currentDate.getDate() === day &&
+                    currentDate.getMonth() === month &&
                     currentDate.getFullYear() === year) {
                     dayElement.classList.add('today');
                 }
-                
+
                 // 日記があるかどうかをチェック
                 if (this.hasDiary(year, month + 1, day)) {
                     dayElement.classList.add('has-diary');
                 }
-                
+
                 this.calendarDaysElement.appendChild(dayElement);
             }
-            
+
             // 下月の日付を入力
             const remainingDays = 42 - this.calendarDaysElement.children.length;
             for (let day = 1; day <= remainingDays; day++) {
@@ -105,6 +150,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        async hasDiary(year, month, day) {
+            try {
+                const response = await fetch('/get_diaries');
+                const diaries = await response.json();
+                const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                return diaries.some(diary => diary.date === dateStr);
+            } catch (error) {
+                console.error('データ取得エラー:', error);
+                return false;
+            }
+        }
+
+
         createDayElement(day, className) {
             const dayElement = document.createElement('div');
             dayElement.className = `calendar-day ${className}`;
@@ -112,36 +170,40 @@ document.addEventListener('DOMContentLoaded', function() {
             return dayElement;
         }
 
-        hasDiary(year, month, day) {
-            const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            return diaries.some(diary => diary.date === dateStr);
-        }
+        // カレンダーの日付をクリックしたとき
+        async showDiaries(year, month, day) {
+            try {
+                console.log("diaryListElement:", this.diaryListElement);
+                const response = await fetch('/get_diaries'); // サーバーからデータ取得
+                const diaries = await response.json();
+                const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const dayDiaries = diaries.filter(diary => diary.date === dateStr);
 
-        showDiaries(year, month, day) {
-            const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-            const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            const dayDiaries = diaries.filter(diary => diary.date === dateStr);
+                const diaryListElement = document.getElementById('diaryList');
+                diaryListElement.innerHTML = '';
 
-            this.diaryListElement.innerHTML = '';
+                if (dayDiaries.length === 0) {
+                    diaryListElement.innerHTML = '<div class="no-diary">この日の日記はありません</div>';
+                    return;
+                }
 
-            if (dayDiaries.length === 0) {
-                this.diaryListElement.innerHTML = '<div class="no-diary">この日の日記はありません</div>';
-                return;
+
+                dayDiaries.forEach(diary => {
+                    const responseText = diary.response && diary.response.trim() !== '' ? diary.response : ''; // 空白対策
+                     const truncatedResponse = responseText.length > 300 ? responseText.substring(0, 800) + '... <span class="read-more">続きを読む</span>' : responseText; // 500文字以上なら省略
+
+                    const diaryElement = document.createElement('div');
+                    diaryElement.className = 'diary-item';
+                    diaryElement.innerHTML = `
+                        <p>${diary.content}</p>
+                        <div class="diary-time">${diary.time}</div>
+                        ${truncatedResponse ? `<div class="diary-feedback">${truncatedResponse}</div>` : ''}
+                    `;
+                    this.diaryListElement.appendChild(diaryElement);
+                });
+            } catch (error) {
+                console.error('データ取得エラー:', error);
             }
-            
-            
-            dayDiaries.forEach(diary => {
-                const diaryElement = document.createElement('div');
-                diaryElement.className = 'diary-item';
-                diaryElement.innerHTML = `
-                    <p>${diary.content}</p>
-                    <div class="diary-time">${diary.time}</div>
-                    ${diary.response ? `<div class="diary-feedback">${diary.response}</div>` : ''}
- 
-                `;
-                this.diaryListElement.appendChild(diaryElement);
-            });
         }
 
         setupEventListeners() {
@@ -155,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.updateCalendar();
             });
             
-            this.calendarDaysElement.addEventListener('click', (e) => {
+            this.calendarDaysElement.addEventListener('click', async(e) => {
                 if (e.target.classList.contains('calendar-day')) {
                     // 以前選択した日付を削除
                     const selectedDay = this.calendarDaysElement.querySelector('.selected');
@@ -171,7 +233,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const month = this.date.getMonth() + 1;
                     const year = this.date.getFullYear();
 
-                    this.showDiaries(year, month, day);
+                    await this.showDiaries(year, month, day);
+                    return;
                 }
             });
         }
@@ -184,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const startVoiceBtn = document.getElementById('startVoice');
     if (!startVoiceBtn) {
         console.error("Start voice button not found");
-        return;
     }
     let recognition = null;
     let siriRecognition = null;
@@ -293,78 +355,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 日記保存
-    document.getElementById('saveDiary').addEventListener('click', () => {
+    document.getElementById('saveDiary').addEventListener('click', async () => {
         const date = document.getElementById('diaryDate').value;
         const content = document.getElementById('diaryContent').value;
-        
+
         if (!date || !content) {
             alert('日付と内容を入力してください。');
             return;
         }
-        
+
         const diary = {
             date: date,
             time: new Date().toLocaleTimeString('ja-JP'),
             content: content
         };
 
-        // ここで日記をサーバーに送信
-        fetch('/save_diary', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(diary)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTPエラー! ステータス: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);
+        try {
+            // サーバーへ日記を保存
+            const response = await fetch('/save_diary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(diary)
+            });
+            const data = await response.json();
             console.log("受け取った JSON:", data);
+            alert(data.message);
 
-            if (!data.diary) {
-                console.error("diary が取得できません");
-                return;
-            }
+            // サーバーから最新の日記を取得して表示
+            const diariesResponse = await fetch('/get_diaries');
+            const diaries = await diariesResponse.json();
+            renderDiaries(diaries);
 
-            // 受け取った日記情報
-            const diary = data.diary;
-
-            console.log("diary.response:", diary.response);
-
-            alert('日記を保存しました！');
-
-            // **HTML に追加**
-            document.getElementById('diaryList').innerHTML += `
-                <div class="diary-item">
-                    <p>${diary.content}</p>
-                    <div class="diary-time">${diary.time}</div>
-                    ${diary.response ? `<div class="diary-feedback">${diary.response}</div>` : '<div class="diary-feedback">応答がありません</div>'}
-                </div>
-                `;
-            })
-        .catch(error => {
+            // フォームをクリア
+            document.getElementById('diaryDate').value = '';
+            document.getElementById('diaryContent').value = '';
+        } catch (error) {
             console.error('フェッチエラー:', error);
-        });
-
-        // ローカルストレージに日記を保存
-        const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
-        diaries.push(diary);
-        localStorage.setItem('diaries', JSON.stringify(diaries));
-
-        // フォームをクリア
-        document.getElementById('diaryDate').value = '';
-        document.getElementById('diaryContent').value = '';
-        alert('日記を保存しました！');
-
-        // カレンダーの更新（カレンダーページの場合）
-        const calendar = document.querySelector('.calendar-page');
-        if (calendar && window.getComputedStyle(calendar).display !== 'none') {
-            new Calendar();
         }
     });
 
@@ -399,5 +425,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 dateInput.click();
             }
         });
-    }
-});
+    };

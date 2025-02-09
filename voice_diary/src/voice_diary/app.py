@@ -31,7 +31,7 @@ def index():
 
 
 @app.route("/save_diary", methods=["POST"])
-def get_diaries():
+def send_diaries():
     collection = db["voice_diary_db"]
     diaries = request.json
     print(f"diaries--->{diaries}")
@@ -96,6 +96,10 @@ def get_diaries():
     }
 })
 
+@app.route("/get_diaries", methods=["GET"])
+def get_diaries():
+    diaries = list(db["voice_diary_db"].find({}, {"_id": 0}))
+    return jsonify(diaries)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
