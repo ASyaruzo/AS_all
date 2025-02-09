@@ -122,9 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
             const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             const dayDiaries = diaries.filter(diary => diary.date === dateStr);
-            
+
             this.diaryListElement.innerHTML = '';
-            
+
             if (dayDiaries.length === 0) {
                 this.diaryListElement.innerHTML = '<div class="no-diary">この日の日記はありません</div>';
                 return;
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .join('');
 
             // "ヘイSiri"が検出された場合、音声入力を開始
-            if (transcript.includes("Hey Siri")) {
+            if (transcript.includes("Hey Moon")) {
                 startVoiceBtn.style.backgroundColor = '#dc3545';
                 siriWave.start(); // SiriWaveを開始
                 recognition.start(); // テキスト入力用の音声認識を開始
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
             time: new Date().toLocaleTimeString('ja-JP'),
             content: content
         };
-        
+
         // ここで日記をサーバーに送信
         fetch('/save_diary', {
             method: 'POST',
@@ -316,23 +316,49 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(diary)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTPエラー! ステータス: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             console.log(data);
+            console.log("受け取った JSON:", data);
+
+            if (!data.diary) {
+                console.error("diary が取得できません");
+                return;
+            }
+
+            // 受け取った日記情報
+            const diary = data.diary;
+
+            console.log("diary.response:", diary.response);
+
             alert('日記を保存しました！');
-            // フォームをクリア
-            document.getElementById('diaryDate').value = '';
-            document.getElementById('diaryContent').value = '';
-        })
-        
+
+            // **HTML に追加**
+            document.getElementById('diaryList').innerHTML += `
+                <div class="diary-item">
+                    <p>${diary.content}</p>
+                    <div class="diary-time">${diary.time}</div>
+                    ${diary.response ? `<div class="diary-feedback">${diary.response}</div>` : '<div class="diary-feedback">応答がありません</div>'}
+                </div>
+                `;
+            })
+        .catch(error => {
+            console.error('フェッチエラー:', error);
+        });
+
+        // ローカルストレージに日記を保存
         const diaries = JSON.parse(localStorage.getItem('diaries') || '[]');
         diaries.push(diary);
         localStorage.setItem('diaries', JSON.stringify(diaries));
-        
+
         // フォームをクリア
         document.getElementById('diaryDate').value = '';
         document.getElementById('diaryContent').value = '';
-        
         alert('日記を保存しました！');
 
         // カレンダーの更新（カレンダーページの場合）

@@ -17,9 +17,9 @@ app = Flask(__name__,
         static_url_path='/static',
         static_folder='templates/static')
 
+
 # MongoDB接続
-# client = MongoClient("mongodb://root:password@mongodb:27017/my_mongo_db")
-client = MongoClient("mongodb://mongodb:27017/my_mongo_db")
+client = MongoClient("mongodb://localhost:27017/my_mongo_db", serverSelectionTimeoutMS=5000)
 db = client["my_mongo_db"]
 collection = db["これコレクション名！"] # 使用するコレクション名
 
@@ -27,27 +27,14 @@ collection = db["これコレクション名！"] # 使用するコレクショ�
 @app.route("/")
 @app.route("/index")
 def index():
-
-    # data = {
-    # "year_month": "2024-12-03",
-    # "japanese_text": "今日はいいことがありました。",
-    # "sad": 20,
-    # "happy": 100,
-    # "angry": 10
-    # }
-
-    # collection.insert_one(data)
-    # data = collection.find_one()
-    # return f"Hello, World! Data: {data}"
     return render_template("index.html")
 
 
 @app.route("/save_diary", methods=["POST"])
 def get_diaries():
-    collection = db["これコレクション名！"] # 使用するコレクション名
+    collection = db["voice_diary_db"]
     diaries = request.json
     print(f"diaries--->{diaries}")
-    print(f"diaries type--->{type(diaries)}")
 
     genai.configure(api_key="AIzaSyBUAulI3ERarPw11x_dlIbOiZ3sKt2f0-w")
     model = genai.GenerativeModel("gemini-1.5-flash")
@@ -92,12 +79,23 @@ def get_diaries():
             """)
 
     result = model.generate_content(result)
-    print(result.text)
+    print(f"result.text ---> {result.text}")
     diaries["response"] = result.text
-    print(diaries)
+    print(f"diaries --- >{diaries}")
     collection.insert_one(diaries)
-    # data = collection.find_one()
-    return render_template("index.html")
+    print("diaries saved")
+
+    # return render_template("index.html")
+    return jsonify({
+    "message": "日記を保存しました！",
+    "diary": {
+        "date": diaries.get("date"),
+        "time": diaries.get("time"),
+        "content": diaries.get("content"),
+        "response": diaries.get("response")
+    }
+})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
