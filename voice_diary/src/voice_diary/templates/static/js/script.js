@@ -320,8 +320,8 @@ function renderDiaries(diaries) {
                 .map(result => result[0].transcript)
                 .join('');
 
-            // "ヘイSiri"が検出された場合、音声入力を開始
-            if (transcript.includes("Hey Moon")) {
+            // "ヘイSiri"が検出された場合、音声入力を開始むん
+            if (transcript.includes("Hey")) {
                 startVoiceBtn.style.backgroundColor = '#dc3545';
                 siriWave.start(); // SiriWaveを開始
                 recognition.start(); // テキスト入力用の音声認識を開始

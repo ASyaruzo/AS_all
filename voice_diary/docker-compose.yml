@@ -10,9 +10,15 @@ services:
       # MONGO_INITDB_ROOT_USERNAME: root
       # MONGO_INITDB_ROOT_PASSWORD: password
       # MONGO_INITDB_DATABASE: my_mongo_db
-    command:  mongod --bind_ip_all --noauth  # 認証を無効化
+    command: mongod --noauth  # 認証を無効化
     networks:
       - my_network
+    # healthcheck:
+    #   test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 60s
 
   flask_app:
     build: ./src/voice_diary/ # FlaskアプリケーションのDockerfileの場所を指定
@@ -22,10 +28,15 @@ services:
     depends_on:
       - mongodb
     environment:
-
       FLASK_ENV: production
       FLASK_APP: /app/app.py
       PYTHONUNBUFFERED: 1 # Pythonの出力を即座に表示してくれる
+      PULSE_SERVER: unix:/run/user/1000/pulse/native
+    volumes:
+      - /run/user/1000/pulse:/run/user/1000/pulse
+      - .:/app  # ソースコードをコンテナにマウント
+    command: ["/app/.venv/bin/uv", "run", "/app/app.py"]
+
     networks:
       - my_network
 
