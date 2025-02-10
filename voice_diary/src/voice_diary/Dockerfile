@@ -1,8 +1,10 @@
-# ベースイメージ
 FROM python:3.12-slim
 
 # 作業ディレクトリを設定
 WORKDIR /app
+
+# 必要なパッケージをインストール
+# RUN apt-get update && apt-get install -y alsa-utils espeak-ng
 
 # `uv` をシステムにインストール
 RUN pip install --no-cache-dir uv
@@ -16,7 +18,7 @@ RUN /app/.venv/bin/python -m ensurepip --upgrade
 # `pip` を最新バージョンにアップグレード
 RUN /app/.venv/bin/python -m pip install --upgrade pip
 
-# ✅ `--no-binary=:all:` を削除して `uv` を仮想環境にインストール
+# `uv` を仮想環境にインストール
 RUN /app/.venv/bin/python -m pip install --no-cache-dir uv
 
 # 環境変数の設定（仮想環境の `bin` ディレクトリを優先）
@@ -35,5 +37,15 @@ COPY . /app
 ENV FLASK_APP=/app/app.py
 ENV FLASK_ENV=production
 
+ENV PULSE_SERVER /dev/null
+
+# RUN apt-get update && apt-get install -y alsa-utils
+
+# PulseAudio の仮想デバイスを設定
+# ENV PULSE_SERVER=unix:/mnt/wslg/PulseServer
+
+# `uv` に実行権限を与える
+RUN chmod +x /app/.venv/bin/uv
+
 # `uv` を使ってアプリを起動
-CMD ["uv", "run", "/app/app.py"]
+CMD ["/app/.venv/bin/uv", "run", "/app/app.py"]

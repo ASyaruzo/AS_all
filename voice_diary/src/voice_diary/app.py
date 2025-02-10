@@ -1,26 +1,19 @@
+#!/usr/bin/env python3
+
 from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
 import pyttsx3
 import google.generativeai as genai
 
 # engine = pyttsx3.init()
-# voices = engine.getProperty('voices')
 
-# for index, voice in enumerate(voices):
-#     print(f"{index}: {voice.id} ({voice.name})")
-
-# engine = pyttsx3.init()
-# engine.say("こんにちは、音声テストです")
-# engine.runAndWait()
-
-# 音声読み上げ関数(引数は読み上げたい文字列)
-def read_pyttsx3(literal):
-    engine = pyttsx3.init(driverName='espeak')
-    rate = engine.getProperty('rate')
-    engine.setProperty('rate', rate-50)
-    # engine.setProperty('voice', voices[0].id) # 0:日本語, 1:英語 rate-50
-    engine.say(literal)
-    engine.runAndWait()
+# def read_pyttsx3(literal):
+#     try:
+#         global engine
+#         engine.say(literal)
+#         engine.runAndWait()
+#     except Exception as e:
+#         print(f"音声読み上げエラー: {e}")
 
 
 app = Flask(__name__,
@@ -33,9 +26,9 @@ try:
     client = MongoClient("mongodb://as_all_mongodb:27017/my_mongo_db", serverSelectionTimeoutMS=5000)
     db = client["my_mongo_db"]
     collection = db["voice_diary_db"]
-    print("✅ MongoDB に正常に接続できました！")
+    print("MongoDB に正常に接続できました！")
 except Exception as e:
-    print(f"❌ MongoDB に接続できませんでした: {e}")
+    print(f"MongoDB に接続できませんでした: {e}")
 
 # ホームページ表示
 @app.route("/")
@@ -48,7 +41,6 @@ def index():
 def send_diaries():
     try:
         diaries = request.json
-        print(f"diaries--->{diaries}")
 
         genai.configure(api_key="AIzaSyBUAulI3ERarPw11x_dlIbOiZ3sKt2f0-w")
         model = genai.GenerativeModel("gemini-1.5-flash")
@@ -93,13 +85,10 @@ def send_diaries():
                 """)
 
         result = model.generate_content(result)
-        print(f"result.text ---> {result.text}")
         diaries["response"] = result.text
-        print(f"diaries --- >{diaries}")
         collection.insert_one(diaries)
         print("diaries saved")
 
-        # return render_template("index.html")
         return jsonify({
         "message": "日記を保存しました！",
         "diary": {
@@ -117,25 +106,26 @@ def send_diaries():
 @app.route("/get_diaries", methods=["GET"])
 def get_diaries():
     try:
+        # クエリパラメータから日付を取得
+        date_query = request.args.get("date")
+
+        # 日付が指定された場合は、その日付の日記のみ取得
+        query = {"date": date_query} if date_query else {}
+
         # MongoDB から最新の日記を取得
-        latest_diary = db["voice_diary_db"].find_one({}, {"_id": 0}, sort=[("date", -1), ("time", -1)])
+        latest_diaries = db["voice_diary_db"].find(query, {"_id": 0}).sort([("date", -1), ("time", -1)])
 
-        if latest_diary and "response" in latest_diary:
-            response_text = latest_diary["response"]
+        diaries_list = list(latest_diaries)
 
-            # `response_text` に改行がある場合、それを適切に処理
-            formatted_text = response_text.replace("\n", " ")
-
-            print(f"🔊 読み上げる内容: {formatted_text}")
-            read_pyttsx3(formatted_text)  # 音声で読み上げ
-
+        if diaries_list:
             return jsonify({
-                "message": "最新の日記のレスポンスを読み上げました。",
-                "diary": latest_diary
+                "message": "日記を取得しました。",
+                "diaries": diaries_list  # ← 配列として返す
             }), 200
         else:
             return jsonify({
-                "message": "日記が見つかりませんでした。"
+                "message": "日記が見つかりませんでした。",
+                "diaries": []
             }), 404
 
     except Exception as e:
