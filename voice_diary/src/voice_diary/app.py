@@ -45,7 +45,7 @@ def send_diaries():
         genai.configure(api_key="AIzaSyBUAulI3ERarPw11x_dlIbOiZ3sKt2f0-w")
         model = genai.GenerativeModel("gemini-1.5-flash")
 
-        result = (f"""
+        prompt = (f"""
                 以下のルールを必ず守ってください。
                 あなたは世界各国の言語が分かる言語学者兼世界一のカウンセラー兼世界一の心理学者兼世界一の格言者として振舞ってください。
                 以下の日記を読んで、返答形式に沿ってアドバイスを返してください。
@@ -84,8 +84,16 @@ def send_diaries():
 
                 """)
 
-        result = model.generate_content(result)
-        diaries["response"] = result.text
+        result = model.generate_content(prompt)
+        if result and result.text:  # None チェック
+            response_text = result.text.strip()
+        if diaries.get("content"):
+            response_text = response_text.replace(diaries["content"], "").strip()
+
+            diaries["response"] = response_text
+        else:
+            diaries["response"] = "共感メッセージを生成できませんでした。"
+
         collection.insert_one(diaries)
         print("diaries saved")
 
