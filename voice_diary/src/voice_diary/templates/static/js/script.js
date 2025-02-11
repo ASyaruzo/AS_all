@@ -1,4 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+import { initializeVoiceRecognition } from './voiceRecognition.js'
+
+
+document.addEventListener('DOMContentLoaded',() =>{
+
+    initializeVoiceRecognition();
+
     // SiriWave 初期化
     const siriContainer = document.getElementById('siri-container');
     if (!siriContainer) {
@@ -180,6 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('日記取得エラー:', error);
         }
     }
+
+    // initializeVoiceRecognition();
 
     document.getElementById('calendar-page').style.display = 'block';
     document.querySelector('[data-page="calendar"]').classList.add('active');
