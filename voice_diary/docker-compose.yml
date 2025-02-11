@@ -1,21 +1,7 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: as_all_mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./mongodb_data:/data/db
-    # environment:
-      # MONGO_INITDB_ROOT_USERNAME: root
-      # MONGO_INITDB_ROOT_PASSWORD: password
-      # MONGO_INITDB_DATABASE: my_mongo_db
-    command:  mongod --bind_ip_all --noauth  # 認証を無効化
-    networks:
-      - my_network
 
   flask_app:
-    build: ./src/voice_diary/ # FlaskアプリケーションのDockerfileの場所を指定
+    build: ./src/voice_diary/
     container_name: flask_app
     ports:
       - "5000:5000"
@@ -24,7 +10,17 @@ services:
     environment:
       FLASK_ENV: production
       FLASK_APP: /app/app.py
-      PYTHONUNBUFFERED: 1 # Pythonの出力を即座に表示してくれる
+    networks:
+      - my_network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: as_all_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    command: mongod --noauth
     networks:
       - my_network
 
@@ -33,5 +29,3 @@ networks:
 
 volumes:
   mongodb_data:
-
-# 今後、本番環境に対応させるため Uvicorn や Gunicorn などの WSGI/ASGIサーバー を使用すること
