@@ -27,7 +27,7 @@ export function initializeVoiceRecognition() {
     recognition.interimResults = true;
 
     siriRecognition = new webkitSpeechRecognition();
-    siriRecognition.lang = 'ja-JP';
+    siriRecognition.lang = 'en-US';
     siriRecognition.continuous = true;
     siriRecognition.interimResults = true;
 
@@ -72,7 +72,12 @@ export function initializeVoiceRecognition() {
             .map(result => result[0].transcript)
             .join('');
 
-        if (transcript.includes("Hey Siri")) {
+        if (transcript.includes("hey moon") ||
+            transcript.includes("hey mon") ||
+            transcript.includes("hey mom") ||
+            transcript.includes("hey man")) {
+
+            console.log(`認識されたトリガーワード: ${transcript}`);
             startVoiceBtn.style.backgroundColor = '#dc3545';
             siriWave.start();
             recognition.start();

@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded',() =>{
 
     initializeVoiceRecognition();
 
+    const diaryDateInput = document.getElementById('diaryDate');
+    if (diaryDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        diaryDateInput.value = today
+    };
+
     // SiriWave 初期化
     const siriContainer = document.getElementById('siri-container');
     if (!siriContainer) {
@@ -123,8 +129,11 @@ document.addEventListener('DOMContentLoaded',() =>{
 
     // 日記保存
     document.getElementById('saveDiary').addEventListener('click', async () => {
-        const date = document.getElementById('diaryDate').value;
-        const content = document.getElementById('diaryContent').value;
+        const diaryDateInput = document.getElementById('diaryDate');
+        const diaryContentInput = document.getElementById('diaryContent');
+
+        const date = diaryDateInput.value;
+        const content = diaryContentInput.value;
 
         if (!date || !content) {
             alert('日付と内容を入力してください。');
@@ -148,7 +157,15 @@ document.addEventListener('DOMContentLoaded',() =>{
 
             if (response.ok) {
                 alert(result.message);
+
+                diaryContentInput.value = '';
+
+                const today = new Date().toISOString().split('T')[0];
+                diaryDateInput.value = today;
+
                 new Calendar();
+                // calendar.updateCalendar();
+
             } else {
                 alert('エラーが発生しました: ' + result.message);
             }
@@ -186,8 +203,6 @@ document.addEventListener('DOMContentLoaded',() =>{
             console.error('日記取得エラー:', error);
         }
     }
-
-    // initializeVoiceRecognition();
 
     document.getElementById('calendar-page').style.display = 'block';
     document.querySelector('[data-page="calendar"]').classList.add('active');
