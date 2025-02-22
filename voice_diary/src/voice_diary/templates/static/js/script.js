@@ -11,6 +11,20 @@ document.addEventListener('DOMContentLoaded',() =>{
         diaryDateInput.value = today
     };
 
+    // メッセージ読み上げ
+    function speakText(text) {
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(text || "共感メッセージがありません");
+            utterance.lang = 'ja-JP';
+            utterance.volume = 1;
+            utterance.rate = 1;
+            utterance.pitch = 2;
+            synth.speak(utterance);
+        }, 100);
+    }
+
     // SiriWave 初期化
     const siriContainer = document.getElementById('siri-container');
     if (!siriContainer) {
@@ -192,6 +206,7 @@ document.addEventListener('DOMContentLoaded',() =>{
             data.diaries.forEach(diary => {
                 const diaryElement = document.createElement('div');
                 diaryElement.className = 'diary-item';
+                diaryElement.dataset.response = diary.response || '共感メッセージがありません';
                 diaryElement.innerHTML = `
                     <p><strong>日記の内容:</strong> ${diary.content}</p>
                     <p><strong>共感:</strong> ${diary.response || 'なし'}</p>
@@ -202,6 +217,20 @@ document.addEventListener('DOMContentLoaded',() =>{
         } catch (error) {
             console.error('日記取得エラー:', error);
         }
+    }
+
+    // diaryListの親要素にクリックイベントを追加
+    const diaryList = document.getElementById('diaryList');
+    if (diaryList) {
+        diaryList.addEventListener('click', (e) => {
+            const diaryItem = e.target.closest('.diary-item');
+            if (diaryItem) {
+                console.log("📌 diary-item クリックされました:", diaryItem);
+                const responseText = diaryItem.dataset.response;
+                console.log("🔊 読み上げる共感メッセージ:", responseText);
+                speakText(responseText);
+            }
+        });
     }
 
     document.getElementById('calendar-page').style.display = 'block';
