@@ -11,18 +11,33 @@ document.addEventListener('DOMContentLoaded',() =>{
         diaryDateInput.value = today
     };
 
+    let isSpeaking = false;
+    const synth = window.speechSynthesis;
+    let currentUtterance = null;
+
     // メッセージ読み上げ
     function speakText(text) {
-        const synth = window.speechSynthesis;
-        synth.cancel();
-        setTimeout(() => {
-            const utterance = new SpeechSynthesisUtterance(text || "共感メッセージがありません");
-            utterance.lang = 'ja-JP';
-            utterance.volume = 1;
-            utterance.rate = 1;
-            utterance.pitch = 2;
-            synth.speak(utterance);
-        }, 100);
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            console.log("🔊 読み上げをキャンセルしました");
+        } else {
+            setTimeout(() => {
+                const currentUtterance = new SpeechSynthesisUtterance(text || "共感メッセージがありません");
+                currentUtterance.lang = 'ja-JP';
+                currentUtterance.volume = 1;
+                currentUtterance.rate = 1;
+                currentUtterance.pitch = 1;
+
+                currentUtterance.onend = () => {
+                    isSpeaking = false;
+                    console.log("🔊 読み上げが完了しました");
+                };
+                synth.speak(currentUtterance);
+                isSpeaking = true;
+                console.log("🔊 読み上げを開始しました");
+            }, 100);
+        }
     }
 
     // SiriWave 初期化
