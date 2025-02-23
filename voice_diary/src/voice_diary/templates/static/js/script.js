@@ -196,6 +196,10 @@ document.addEventListener('DOMContentLoaded',() =>{
                     <p><strong>日記の内容:</strong> ${diary.content}</p>
                     <p><strong>共感:</strong> ${diary.response || 'なし'}</p>
                     <div class="diary-time">${diary.time}</div>
+                    <img src="../images/happy.png" style="width:20px;height:20px;">
+                    <img src="../images/natural.png" style="width:20px;height:20px;">
+                    <img src="../images/sad.png" style="width:20px;height:20px;">
+                    
                 `;
                 diaryList.appendChild(diaryElement);
             });

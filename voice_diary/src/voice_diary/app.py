@@ -5,16 +5,6 @@ from pymongo import MongoClient
 import pyttsx3
 import google.generativeai as genai
 
-# engine = pyttsx3.init()
-
-# def read_pyttsx3(literal):
-#     try:
-#         global engine
-#         engine.say(literal)
-#         engine.runAndWait()
-#     except Exception as e:
-#         print(f"音声読み上げエラー: {e}")
-
 
 app = Flask(__name__,
         static_url_path='/static',
@@ -84,7 +74,27 @@ def send_diaries():
 
                 """)
 
+        prompt4emnum = (f"""
+                以下のルールを必ず守ってください。
+                感情の大きさによって円の大きさを変えるというものを考えています。そこで、
+                あなたは感情の大きさをHTMLのpxサイズに数値化できる専門家です
+                以下の日記を読んで、返答形式に沿って感情を数値化してください。
+                それ以外の条件は条件に沿ってください。
+                絶対厳守の条件は必ず守ってください。ガイドラインです。
+                ###日記###
+                {list(diaries.values())[2]}
+                ###
+                
+                ###返答形式###
+                30px, 20px, 40px
+                内容は左から、嬉しさ、中立、悲しみ、です。
+                ###
+                         
+                         """)
+        
         result = model.generate_content(prompt)
+        prompt4emnum = model.generate_content(prompt4emnum)
+
         if result and result.text:  # None チェック
             response_text = result.text.strip()
         if diaries.get("content"):
@@ -94,16 +104,18 @@ def send_diaries():
         else:
             diaries["response"] = "共感メッセージを生成できませんでした。"
 
+        diaries["prompt4emnum"] = prompt4emnum
         collection.insert_one(diaries)
         print("diaries saved")
-
+        print(prompt4emnum)
         return jsonify({
         "message": "日記を保存しました！",
         "diary": {
             "date": diaries.get("date"),
             "time": diaries.get("time"),
             "content": diaries.get("content"),
-            "response": diaries.get("response")
+            "response": diaries.get("response"),
+            "prompt4emnum": diaries.get("prompt4emnum")
             }
         }), 200
     except Exception as e:
