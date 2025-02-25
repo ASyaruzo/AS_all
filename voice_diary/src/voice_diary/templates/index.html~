@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日記</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/siriwave/dist/siriwave.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+
+        <header class="app-header">
+            <h1>Voice Diary</h1>
+        </header>
+
+        <main class="main-content">
+            <!-- 日記作成ページ -->
+            <div class="page" id="create-page" style="display: none;">
+                <div class="create-form">
+                    <div class="form-group">
+                        <input type="date" id="diaryDate" class="diary-date">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="diaryContent" placeholder="今日の出来事を書きましょう..."></textarea>
+                        <button id="startVoice" class="voice-input-btn">
+                            <span class="material-icons">mic</span>
+                        </button>
+
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button id="saveDiary" class="save-btn">保存</button>
+                    </div>
+
+                    <!-- SiriWave コンテナ -->
+                    <div id="siri-container"></div>
+
+                </div>
+            </div>
+
+            <!-- カレンダーページ -->
+            <div class="page" id="calendar-page" style="display: none;">
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" id="prevMonth">
+                            <span class="material-icons">chevron_left</span>
+                        </button>
+                        <h3 id="currentMonth"></h3>
+                        <button class="calendar-nav-btn" id="nextMonth">
+                            <span class="material-icons">chevron_right</span>
+                        </button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>日</div>
+                        <div>月</div>
+                        <div>火</div>
+                        <div>水</div>
+                        <div>木</div>
+                        <div>金</div>
+                        <div>土</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                </div>
+                <div class="diary-list" id="diaryList"></div>
+            </div>
+
+            <!-- 設定ページ -->
+            <div class="page" id="settings-page" style="display: none;">
+                <div class="settings-list">
+                    <div class="settings-item">
+                        <span class="material-icons">dark_mode</span>
+                        <span>ダークモード</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item" data-page="calendar">
+                <span class="material-icons">calendar_month</span>
+                <span>カレンダー</span>
+            </div>
+            <div class="nav-item create-btn" data-page="create">
+                <span class="material-icons">add</span>
+                <span>作成</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <span class="material-icons">settings</span>
+                <span>設定</span>
+            </div>
+        </nav>
+
+    </div>
+    <script type="module" src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- <script type="module" src="script.js"></script> -->
+    <!-- <script src="/static/js/voiceRecognition.js"></script> -->
+</body>
+</html>
