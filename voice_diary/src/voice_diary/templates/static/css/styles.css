@@ -51,20 +51,30 @@ body {
 }
 
 .app-header {
-    background-color: var(--purple);
-    color: var(--white);
+    background-color: var(--white);
+    color: var(--purple);
     padding: 1rem;
-    text-align: center;
+    text-align: left;
     position: fixed;
     top: 0;
     width: 100%;
     max-width: 430px;
     z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .app-header h1 {
-    margin: 0;
+    margin: 0 0 0 20px;
     font-size: calc(var(--base-font-size) * 1.5);
+}
+
+.favicon-icon {
+    width: 32px; /* アイコンのサイズ */
+    height: 32px;
 }
 
 .main-content {
