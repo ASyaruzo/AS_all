@@ -5,6 +5,9 @@ export function initializeVoiceRecognition() {
     const diaryContent = document.getElementById('diaryContent');
     const createBtn = document.querySelector('.create-btn');
 
+    let autoSaveTimer;
+    const AUTO_SAVE_DELAY = 10000;  // 10秒
+
     if (!startVoiceBtn || !siriContainer || !diaryContent) {
         console.error("必要な要素が見つかりません。音声認識を初期化できません。");
         return;
@@ -64,8 +67,34 @@ export function initializeVoiceRecognition() {
             .map(result => result[0].transcript)
             .join('');
 
+        // 自動保存タイマーをリセット
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSaveDiary, AUTO_SAVE_DELAY);
+
         inactivityTimeout = setTimeout(stopRecognition, 5000);
     };
+
+    function stopRecognition() {
+        if (recognition) recognition.stop();
+        if (siriRecognition) siriRecognition.stop();
+        isRecognizing = false;
+        startVoiceBtn.style.backgroundColor = '';
+        siriWave.stop();
+        siriContainer.style.display = 'none';
+        clearTimeout(inactivityTimeout);
+        
+        // 停止録音時も自動保存タイマーを起動
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSaveDiary, AUTO_SAVE_DELAY);
+    }
+
+    // 自動保存
+    function autoSaveDiary() {
+        const saveDiaryButton = document.getElementById('saveDiary');
+        if (diaryContent.value.trim() !== '') {
+            saveDiaryButton.click();
+        }
+    }
 
     siriRecognition.onresult = (event) => {
         const transcript = Array.from(event.results)
