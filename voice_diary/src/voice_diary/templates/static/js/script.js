@@ -222,10 +222,21 @@ document.addEventListener('DOMContentLoaded',() =>{
                 const diaryElement = document.createElement('div');
                 diaryElement.className = 'diary-item';
                 diaryElement.dataset.response = diary.response || '共感メッセージがありません';
+                const emotionSizes = diary.prompt4emnum.split(',').map(size => parseInt(size.trim()));
+                console.log("感情のサイズ:", emotionSizes);
+
                 diaryElement.innerHTML = `
                     <p><strong>日記の内容:</strong> ${diary.content}</p>
                     <p><strong>共感:</strong> ${diary.response || 'なし'}</p>
                     <div class="diary-time">${diary.time}</div>
+                    <div style="display: flex;">
+                            <div style="width: ${emotionSizes[0]}px; height: ${emotionSizes[0]}px; border-radius: 50%; margin: 10px; background-color: red;">興奮</div>
+                            <div style="width: ${emotionSizes[1]}px; height: ${emotionSizes[1]}px; border-radius: 50%; margin: 10px; background-color: orange;">嬉しさ</div>
+                            <div style="width: ${emotionSizes[2]}px; height: ${emotionSizes[2]}px; border-radius: 50%; margin: 10px; background-color: green;">中立</div>
+                            <div style="width: ${emotionSizes[3]}px; height: ${emotionSizes[3]}px; border-radius: 50%; margin: 10px; background-color: skyblue;">悲しみ</div>
+                            <div style="width: ${emotionSizes[4]}px; height: ${emotionSizes[4]}px; border-radius: 50%; margin: 10px; background-color: blue;">疲れ</div>
+                    </div>
+
                 `;
                 diaryList.appendChild(diaryElement);
             });
