@@ -76,6 +76,7 @@ body {
 .favicon-icon {
     width: 32px; /* アイコンのサイズ */
     height: 32px;
+    margin-right: 20px;
 }
 
 .main-content {
@@ -671,6 +672,122 @@ input:checked + .slider:before {
     background: rgba(249, 188, 96, 0.1);
     border-radius: 0.625rem;
     margin-top: 0.9375rem;
+}
+
+.emotion-container {
+    margin: 20px 0;
+    padding: 10px;
+}
+
+.no-prompt .emotion-container {
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+
+.emotion-container:empty {
+    display: none;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.emotion-circles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.emotion-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    position: relative;
+    transform-origin: center;
+}
+
+.emotion-circle span {
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.emotion-circle.excitement { background-color: #e76f51; }
+.emotion-circle.happiness { background-color: #f9c74f; }
+.emotion-circle.neutral { background-color: #a7c957; }
+.emotion-circle.sadness { background-color: #4cc9f0; }
+.emotion-circle.tired { background-color: #277da1; }
+
+.emotion-circles.flower-pattern {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.emotion-circles.flower-pattern .emotion-circle {
+    position: absolute;
+    opacity: 0.8;
+    transform-origin: center;
+}
+
+/* センター円 */
+.emotion-circles.flower-pattern .emotion-circle.neutral {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(var(--scale-value, 1));
+    z-index: 5;
+}
+
+/* 上円 */
+.emotion-circles.flower-pattern .emotion-circle.excitement {
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(var(--scale-value, 1));
+    z-index: 1;
+}
+
+/* 右円 */
+.emotion-circles.flower-pattern .emotion-circle.happiness {
+    top: 50%;
+    left: 80%;
+    transform: translate(-50%, -50%) scale(var(--scale-value, 1));
+    z-index: 2;
+}
+
+/* 下円 */
+.emotion-circles.flower-pattern .emotion-circle.sadness {
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(var(--scale-value, 1));
+    z-index: 3;
+}
+
+/* 左円 */
+.emotion-circles.flower-pattern .emotion-circle.tired {
+    top: 50%;
+    left: 20%;
+    transform: translate(-50%, -50%) scale(var(--scale-value, 1));
+    z-index: 4;
+}
+
+.emotion-circles.flower-pattern .emotion-circle span {
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ダークモード適応 */
+body.dark-mode .emotion-circle {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 /* 作成ページ */

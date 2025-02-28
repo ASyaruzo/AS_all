@@ -209,32 +209,71 @@ document.addEventListener('DOMContentLoaded',() =>{
         try {
             const response = await fetch(`/get_diaries?date=${date}`);
             const data = await response.json();
-
+    
             const diaryList = document.getElementById('diaryList');
             diaryList.innerHTML = '';
-
+    
             if (data.diaries.length === 0) {
                 diaryList.innerHTML = '<div class="no-diary">この日の日記はありません</div>';
                 return;
             }
-
+    
             data.diaries.forEach(diary => {
                 const diaryElement = document.createElement('div');
                 diaryElement.className = 'diary-item';
                 diaryElement.dataset.response = diary.response || '共感メッセージがありません';
-                const emotionSizes = diary.prompt4emnum.split(',').map(size => parseInt(size.trim()));
+                
                 diaryElement.innerHTML = `
-                    <p><strong>日記の内容:</strong> ${diary.content}</p>
+                    <p style="margin-bottom: 10px;"><strong>日記の内容:</strong> ${diary.content}</p>
                     <p><strong>共感:</strong> ${diary.response || 'なし'}</p>
                     <div class="diary-time">${diary.time}</div>
-                    <div style="display: flex;">
-                            <div style="width: ${emotionSizes[0]}px; height: ${emotionSizes[0]}px; border-radius: 50%; margin: 10px; background-color: red;">興奮</div>
-                            <div style="width: ${emotionSizes[1]}px; height: ${emotionSizes[1]}px; border-radius: 50%; margin: 10px; background-color: orange;">嬉しさ</div>
-                            <div style="width: ${emotionSizes[2]}px; height: ${emotionSizes[2]}px; border-radius: 50%; margin: 10px; background-color: green;">中立</div>
-                            <div style="width: ${emotionSizes[3]}px; height: ${emotionSizes[3]}px; border-radius: 50%; margin: 10px; background-color: skyblue;">悲しみ</div>
-                            <div style="width: ${emotionSizes[4]}px; height: ${emotionSizes[4]}px; border-radius: 50%; margin: 10px; background-color: blue;">疲れ</div>
-                    </div>
                 `;
+                
+                let shouldShowEmotions = false;
+                
+                if (diary.prompt4emnum && diary.prompt4emnum.trim() !== '') {
+                    try {
+                        const emotionSizes = diary.prompt4emnum.split(',').map(size => parseInt(size.trim()));
+                        
+                        const allZeros = emotionSizes.every(size => size === 0 || isNaN(size));
+                        
+                        if (emotionSizes.length === 5 && !allZeros) {
+                            shouldShowEmotions = true;
+                            
+                            const emotionContainer = document.createElement('div');
+                            emotionContainer.className = 'emotion-container';
+                            
+                            const emotionCircles = document.createElement('div');
+                            emotionCircles.className = 'emotion-circles flower-pattern';
+                            
+                            const emotions = [
+                                { name: 'excitement', label: '興奮', size: emotionSizes[0] },
+                                { name: 'happiness', label: '嬉しさ', size: emotionSizes[1] },
+                                { name: 'neutral', label: '中立', size: emotionSizes[2] },
+                                { name: 'sadness', label: '悲しみ', size: emotionSizes[3] },
+                                { name: 'tired', label: '疲れ', size: emotionSizes[4] }
+                            ];
+                            
+                            emotions.forEach(emotion => {
+                                const circle = document.createElement('div');
+                                circle.className = `emotion-circle ${emotion.name}`;
+                                circle.style.setProperty('--scale-value', emotion.size/40);
+                                
+                                const span = document.createElement('span');
+                                span.textContent = emotion.label;
+                                
+                                circle.appendChild(span);
+                                emotionCircles.appendChild(circle);
+                            });
+                            
+                            emotionContainer.appendChild(emotionCircles);
+                            diaryElement.appendChild(emotionContainer);
+                        }
+                    } catch (error) {
+                        console.error('日記取得エラー:', error);
+                    }
+                }
+                
                 diaryList.appendChild(diaryElement);
             });
         } catch (error) {
