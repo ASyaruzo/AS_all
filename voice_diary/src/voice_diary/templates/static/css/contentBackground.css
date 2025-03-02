@@ -1,0 +1,45 @@
+/* main-content の背景コンテナ */
+#content-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* 背景として配置 */
+    pointer-events: none;
+}
+
+.main-content {
+    position: relative;
+}
+
+/* 小さな浮遊する丸 */
+.small-circle {
+    position: absolute;
+    bottom: -20px; /* 初期位置を画面の下 */
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: floatSmallUp linear infinite;
+}
+
+/* 小さな丸がゆらゆらしながら上昇するアニメーション */
+@keyframes floatSmallUp {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translateX(-10px) translateY(-25%);
+    }
+    50% {
+        transform: translateX(10px) translateY(-50%);
+    }
+    75% {
+        transform: translateX(-8px) translateY(-75%);
+    }
+    100% {
+        transform: translateX(8px) translateY(-110vh);
+        opacity: 0;
+    }
+}
