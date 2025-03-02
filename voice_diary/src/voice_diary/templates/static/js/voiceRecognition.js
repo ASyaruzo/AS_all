@@ -128,7 +128,16 @@ export function initializeVoiceRecognition() {
             // 作成ページへ移動
             document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
             document.getElementById('create-page').style.display = 'block';
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetPage = item.getAttribute('data-page');
+
+                    if (isRecognizing && targetPage !== 'create') {
+                        console.log(" 他のページへ移動したため、音声認識を停止");
+                        stopRecognition();
+                    }
+                });
+            });
             document.querySelector('[data-page="create"]').classList.add('active');
 
             // 作成ページへ移動
@@ -137,15 +146,19 @@ export function initializeVoiceRecognition() {
             startVoiceBtn.style.backgroundColor = '#dc3545';
             siriWave.start();
             recognition.start();
-
-            setTimeout(() => {
-                siriRecognition.start();
-            }, 1000);
         }
     };
 
     // 初回ロード時に hey moon を常に待ち受ける
     siriRecognition.start();
+
+    // ユーザーが別のタブに移動した時に音声認識を停止**
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            console.log("ユーザーがタブを離れたため、音声認識を停止したで！");
+            stopRecognition();
+        }
+    });
 
 
     // 音声入力ボタンのクリックイベント
