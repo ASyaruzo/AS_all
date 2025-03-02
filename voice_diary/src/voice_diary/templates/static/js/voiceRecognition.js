@@ -82,20 +82,31 @@ export function initializeVoiceRecognition() {
 
 
         let interimTranscript = ''; // 途中経過の音声
-        finalTranscript = ''; // 確定した音声データを保持
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript.trim();
             if (event.results[i].isFinal) {
-                finalTranscript += transcript; // 確定した音声データを追加
+                finalTranscript += transcript +" "; // 確定した音声データを追加
                 isSpeaking = false; //f 確定したらhey moon を有効化
             } else {
-                interimTranscript += transcript; // 途中経過の音声も取得
+                interimTranscript = transcript; // 途中経過の音声を更新
                 isSpeaking = true; // 途中経過の時はhey moon を無効化
             }
         }
 
-        console.log("🎤 認識中:", interimTranscript || finalTranscript, "🟢 isSpeaking:", isSpeaking);
+        console.log("認識中:", interimTranscript, "isSpeaking:", isSpeaking, "finalTranscript", finalTranscript);
+
+        // diaryContentを最新のものに更新
+        const diaryContent = document.getElementById('diaryContent');
+        if (diaryContent) {
+             // 確定した音声を保持するため、`value` に上書きするのではなく **結合** する
+             diaryContent.value = finalTranscript + (interimTranscript ? ` ${interimTranscript}` : "");
+
+            // 途中経過をリアルタイムで表示しつつ、上書
+            // if (interimTranscript) {
+            //     diaryContent.value += ` ${interimTranscript}`; // 途中経過を追記（リアルタイム表示）
+            // }
+        }
 
         // 自動保存タイマーをリセット
         clearTimeout(autoSaveTimer);
@@ -110,6 +121,8 @@ export function initializeVoiceRecognition() {
         const saveDiaryButton = document.getElementById('saveDiary');
         if (diaryContent.value.trim() !== '') {
             saveDiaryButton.click();
+
+            finalTranscript = ''; // 保存後は確定した音声データをリセット
         }
     }
 
