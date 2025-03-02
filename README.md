@@ -22,4 +22,8 @@
 - Python 3.12
 - Docker 27.2
 
-
+## 使い方
+1. cd AS_ALL/voice_diaryに移動
+2. docker-compose build
+3. docker-compose up
+4. localhostで確認
