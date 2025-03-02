@@ -1,9 +1,10 @@
 import { initializeVoiceRecognition } from './voiceRecognition.js'
-
+import { initializeDarkMode } from './darkMode.js'
 
 document.addEventListener('DOMContentLoaded',() =>{
 
     initializeVoiceRecognition();
+    initializeDarkMode();
 
     const diaryDateInput = document.getElementById('diaryDate');
     if (diaryDateInput) {
