@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded',() =>{
             const result = await response.json();
 
             if (response.ok) {
-                alert(result.message);
 
                 diaryContentInput.value = '';
 
@@ -194,6 +193,15 @@ document.addEventListener('DOMContentLoaded',() =>{
 
                 new Calendar();
                 // calendar.updateCalendar();
+
+                const createpage = document.getElementById('create-page');
+                const calendarpage = document.getElementById('calendar-page');
+            
+                createpage.style.display = 'none';
+                createpage.classList.remove('active');
+                calendarpage.style.display = 'block';
+                createpage.classList.add('active');
+                
 
             } else {
                 alert('エラーが発生しました: ' + result.message);
