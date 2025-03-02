@@ -68,10 +68,10 @@ export function initializeVoiceRecognition() {
     recognition.onstart = startRecognition;
 
     recognition.onend = () => {
-        stopRecognition();
-        if (!isSpeaking && !isRecognizing) {
+        if (isRecognizing) {
+            recognition.start();
+        } else {
             setTimeout(() => {
-                if (!siriRecognition) return;
                 siriRecognition.start();
             }, 1000);
         }
