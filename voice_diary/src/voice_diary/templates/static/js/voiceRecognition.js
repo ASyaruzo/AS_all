@@ -6,7 +6,7 @@ export function initializeVoiceRecognition() {
     const createBtn = document.querySelector('.create-btn');
 
     let autoSaveTimer;
-    const AUTO_SAVE_DELAY = 10000;  // 10秒
+    const AUTO_SAVE_DELAY = 5000;  // 5秒
 
     if (!startVoiceBtn || !siriContainer || !diaryContent) {
         console.error("必要な要素が見つかりません。音声認識を初期化できません。");
