@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded',() =>{
             const year = this.date.getFullYear();
             const month = this.date.getMonth();
             this.currentMonthElement.textContent = `${year}年 ${this.months[month]}`;
-            this.calendarDaysElement.innerHTML = '';
+            this.calendarDaysElement.innerHTML = '';  // カレンダーをクリア
 
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded',() =>{
             const dayElement = document.createElement('div');
             dayElement.className = `calendar-day ${className}`;
             dayElement.textContent = day;
+
             return dayElement;
         }
 
@@ -155,7 +156,7 @@ document.addEventListener('DOMContentLoaded',() =>{
         }
     }
 
-    new Calendar();
+    const calendar = new Calendar();
 
     // 日記保存
     document.getElementById('saveDiary').addEventListener('click', async () => {
@@ -192,8 +193,7 @@ document.addEventListener('DOMContentLoaded',() =>{
                 const today = new Date().toISOString().split('T')[0];
                 diaryDateInput.value = today;
 
-                new Calendar();
-                // calendar.updateCalendar();
+                calendar.updateCalendar();
 
                 const createpage = document.getElementById('create-page');
                 const calendarpage = document.getElementById('calendar-page');
