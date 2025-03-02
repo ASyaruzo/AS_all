@@ -17,6 +17,7 @@ export function initializeVoiceRecognition() {
     let siriRecognition = null;
     let isRecognizing = false;
     let inactivityTimeout = null;
+    let isSpeaking = false; // 音声入力中かどうか
 
     if (!('webkitSpeechRecognition' in window)) {
         alert("お使いのブラウザは音声認識をサポートしていません。");
@@ -26,16 +27,20 @@ export function initializeVoiceRecognition() {
     // 音声認識のインスタンス作成
     recognition = new webkitSpeechRecognition();
     recognition.lang = 'ja-JP';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.continuous = true; // 音声認識を常時有効化
+    recognition.interimResults = true; // リアルタイムで認証結果を取得
 
     siriRecognition = new webkitSpeechRecognition();
     siriRecognition.lang = 'en-US';
     siriRecognition.continuous = true;
     siriRecognition.interimResults = true;
 
+    let finalTranscript = '' // 確定した音声データを保持
+
     function startRecognition() {
+        if (isRecognizing) return;  // すでに開始されていたら何もしない
         isRecognizing = true;
+        isSpeaking = true; // 音声入力中はhey moon を無効化
         startVoiceBtn.style.backgroundColor = '#dc3545';
         siriWave.start();
         siriContainer.style.display = 'block';
@@ -44,28 +49,53 @@ export function initializeVoiceRecognition() {
         inactivityTimeout = setTimeout(stopRecognition, 5000);
     }
 
+    // 一定時間無音だった時の処理
     function stopRecognition() {
+        if (!isRecognizing) return;  // すでに停止していたら何もしない
         if (recognition) recognition.stop();
-        if (siriRecognition) siriRecognition.stop();
         isRecognizing = false;
+        isSpeaking = false;
         startVoiceBtn.style.backgroundColor = '';
         siriWave.stop();
         siriContainer.style.display = 'none';
         clearTimeout(inactivityTimeout);
+
+        // 音声入力中に一定時間無音だった時も、自動保存タイマーを起動
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSaveDiary, AUTO_SAVE_DELAY);
     }
 
     recognition.onstart = startRecognition;
 
     recognition.onend = () => {
         stopRecognition();
-        if (siriRecognition) siriRecognition.start();
-    };
+        if (!isSpeaking && !isRecognizing) {
+            setTimeout(() => {
+                if (!siriRecognition) return;
+                siriRecognition.start();
+            }, 1000);
+        }
+        };
 
     recognition.onresult = (event) => {
         clearTimeout(inactivityTimeout);
-        diaryContent.value = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
+
+
+        let interimTranscript = ''; // 途中経過の音声
+        finalTranscript = ''; // 確定した音声データを保持
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript.trim();
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript; // 確定した音声データを追加
+                isSpeaking = false; //f 確定したらhey moon を有効化
+            } else {
+                interimTranscript += transcript; // 途中経過の音声も取得
+                isSpeaking = true; // 途中経過の時はhey moon を無効化
+            }
+        }
+
+        console.log("🎤 認識中:", interimTranscript || finalTranscript, "🟢 isSpeaking:", isSpeaking);
 
         // 自動保存タイマーをリセット
         clearTimeout(autoSaveTimer);
@@ -74,19 +104,6 @@ export function initializeVoiceRecognition() {
         inactivityTimeout = setTimeout(stopRecognition, 5000);
     };
 
-    function stopRecognition() {
-        if (recognition) recognition.stop();
-        if (siriRecognition) siriRecognition.stop();
-        isRecognizing = false;
-        startVoiceBtn.style.backgroundColor = '';
-        siriWave.stop();
-        siriContainer.style.display = 'none';
-        clearTimeout(inactivityTimeout);
-        
-        // 停止録音時も自動保存タイマーを起動
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(autoSaveDiary, AUTO_SAVE_DELAY);
-    }
 
     // 自動保存
     function autoSaveDiary() {
@@ -101,28 +118,35 @@ export function initializeVoiceRecognition() {
             .map(result => result[0].transcript)
             .join('');
 
-        if (transcript.includes("hey moon") ||
+        if (!isSpeaking && (
+            transcript.includes("hey moon") ||
             transcript.includes("hey mon") ||
             transcript.includes("hey mom") ||
-            transcript.includes("hey man")) {
+            transcript.includes("hey man")
+        )) {
 
-            console.log(`認識されたトリガーワード: ${transcript}`);
+            // 作成ページへ移動
+            document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
+            document.getElementById('create-page').style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector('[data-page="create"]').classList.add('active');
+
+            // 作成ページへ移動
+            window.dispatchEvent(new CustomEvent('voiceCommand', { detail: 'hey moon' }));
+
             startVoiceBtn.style.backgroundColor = '#dc3545';
             siriWave.start();
             recognition.start();
+
+            setTimeout(() => {
+                siriRecognition.start();
+            }, 1000);
         }
     };
 
-    // `create-btn` が存在する場合のみイベントを追加
-    if (createBtn) {
-        createBtn.addEventListener('click', () => {
-            if (!siriRecognition) {
-                alert('お使いのブラウザは音声入力に対応していません。');
-                return;
-            }
-            siriRecognition.start();
-        });
-    }
+    // 初回ロード時に hey moon を常に待ち受ける
+    siriRecognition.start();
+
 
     // 音声入力ボタンのクリックイベント
     startVoiceBtn.addEventListener('click', () => {
