@@ -162,6 +162,12 @@ document.addEventListener('DOMContentLoaded',() =>{
     document.getElementById('saveDiary').addEventListener('click', async () => {
         const diaryDateInput = document.getElementById('diaryDate');
         const diaryContentInput = document.getElementById('diaryContent');
+        const createpage = document.querySelector('#create-page');
+        const calendarpage = document.querySelector('#calendar-page');
+        const loading = document.querySelector('#loading');
+        createpage.style.display = 'none';
+        loading.style.display = 'block';
+        createpage.classList.remove('active');
 
         const date = diaryDateInput.value;
         const content = diaryContentInput.value;
@@ -187,7 +193,8 @@ document.addEventListener('DOMContentLoaded',() =>{
             const result = await response.json();
 
             if (response.ok) {
-
+                const dateString = date;
+                const onetime_day = dateString.split('-')[2];
                 diaryContentInput.value = '';
 
                 const today = new Date().toISOString().split('T')[0];
@@ -195,13 +202,16 @@ document.addEventListener('DOMContentLoaded',() =>{
 
                 calendar.updateCalendar();
 
-                const createpage = document.getElementById('create-page');
-                const calendarpage = document.getElementById('calendar-page');
-            
-                createpage.style.display = 'none';
-                createpage.classList.remove('active');
                 calendarpage.style.display = 'block';
-                createpage.classList.add('active');
+                calendarpage.classList.add('active');
+                loading.style.display = 'none';
+
+                setTimeout(() => {
+                    const elements = document.querySelectorAll('.calendar-day');
+                    const filteredElements = Array.from(elements).filter(el => !el.classList.contains('other-month'));
+                    filteredElements[onetime_day - 1].classList.add('selected');
+                    fetchDiaries(dateString); 
+                }, 200);
                 
 
             } else {

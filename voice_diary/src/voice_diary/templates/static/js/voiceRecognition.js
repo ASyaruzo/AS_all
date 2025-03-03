@@ -107,7 +107,8 @@ export function initializeVoiceRecognition() {
             transcript.includes("hey man") ||
             transcript.includes("Hey, Moon.") ||
             transcript.includes("Hate Moon?") ||
-            transcript.includes("Haymoon.")) {
+            transcript.includes("Haymoon.") ||
+            transcript.includes("Hey, man.")) {
 
             console.log(`認識されたトリガーワード: ${transcript}`);
             startVoiceBtn.style.backgroundColor = '#dc3545';
