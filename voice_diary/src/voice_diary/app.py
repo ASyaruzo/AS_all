@@ -158,7 +158,7 @@ def get_diaries():
             return jsonify({
                 "message": "日記が見つかりませんでした。",
                 "diaries": []
-            }), 404
+            }), 200
 
     except Exception as e:
         print(f"データ取得エラー: {e}")
